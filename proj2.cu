@@ -1,8 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#define KERNEL_SIZE 3
-#define TILE_SIZE 30
-#define BLOCK_SIZE (TILE_SIZE)+(KERNEL_SIZE)-1
 
 __constant__ float Mc[KERNEL_SIZE][KERNEL_SIZE];
 
@@ -10,7 +7,7 @@ void single_3DConv(){
 
 }
 void multi_3DConv(){
-	
+
 }
 __global__ void 3DConv(float* N,float* P, int height, int width){
 
@@ -38,9 +35,10 @@ int main(int argc, const char** argv){
             printf("%c ",a);
        }
        state = fclose(input_file);
-        state2 = fclose(kernel_file);
-        state3 = fclose(output_file);
-    }else{
+       state2 = fclose(kernel_file);
+       state3 = fclose(output_file);
+    }
+	else{
         printf("parameter 부족\n");
     }
     
@@ -48,6 +46,33 @@ int main(int argc, const char** argv){
         printf("스트림 제거시 오류발생");
         return 1;
     }
+
+	dim3 dimGrid(ceil(Width/(TILE_WIDTH*1.0)), ceil(Width/(TILE_WIDTH*1.0)),1);
+	dim3 dimBlock(TILE_WIDTH,TILE_WIDTH,1);
+	
+	cudaEvent_t start, end;
+	float time_ms_single=0, time_ms_multi=0, time_ms_GPU=0;
+	cudaEventCreate(&start);
+	cudaEventCreate(&end);
+
+	cudaEventRecord(start,0);
+	single_3DConv();
+	cudaEventRecord(end,0);
+	cudaEventSynchronize(end);
+	cudaEventElapsedTime(&time_ms_single,start,end);
+
+	cudaEventRecord(start,0);
+	multi_3DConv();
+	cudaEventRecord(end,0);
+	cudaEventSynchronize(end);
+	cudaEventElapsedTime(&time_ms_multi,start,end);
+
+	cudaEventRecord(start,0);
+	3DConv<<<dimGrid,dimBlock>>>();
+	cudaEventRecord(end,0);
+	cudaEventSynchronize(end);
+	cudaEventElapsedTime(&time_ms_GPU,start,end);
+
     return 0;
 
 }
