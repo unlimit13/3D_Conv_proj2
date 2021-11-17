@@ -1,6 +1,6 @@
-lab6 : lab6.cu
-	nvcc lab6.cu -o lab6
+proj2 : proj2.cu
+	nvcc proj2.cu -o proj2
 
 clean : 
-	\rm -f lab6
+	\rm -f proj2
 
