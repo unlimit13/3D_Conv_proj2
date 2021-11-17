@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#define KERNEL_SIZE 3
 
 __constant__ float Mc[KERNEL_SIZE][KERNEL_SIZE];
 
@@ -9,8 +10,8 @@ void single_3DConv(){
 void multi_3DConv(){
 
 }
-__global__ void 3DConv(float* N,float* P, int height, int width){
-
+__global__ void _3DConv(){
+	__syncthreads();
 
 }
 int main(int argc, const char** argv){
@@ -47,9 +48,9 @@ int main(int argc, const char** argv){
         return 1;
     }
 
-	dim3 dimGrid(ceil(Width/(TILE_WIDTH*1.0)), ceil(Width/(TILE_WIDTH*1.0)),1);
-	dim3 dimBlock(TILE_WIDTH,TILE_WIDTH,1);
-	
+	dim3 dimGrid(1,1,1);
+	dim3 dimBlock(1,1,1);
+
 	cudaEvent_t start, end;
 	float time_ms_single=0, time_ms_multi=0, time_ms_GPU=0;
 	cudaEventCreate(&start);
@@ -68,7 +69,7 @@ int main(int argc, const char** argv){
 	cudaEventElapsedTime(&time_ms_multi,start,end);
 
 	cudaEventRecord(start,0);
-	3DConv<<<dimGrid,dimBlock>>>();
+	_3DConv<<<dimGrid,dimBlock>>>();
 	cudaEventRecord(end,0);
 	cudaEventSynchronize(end);
 	cudaEventElapsedTime(&time_ms_GPU,start,end);
