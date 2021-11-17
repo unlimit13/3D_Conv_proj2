@@ -15,7 +15,8 @@ __global__ void _3DConv(){
 
 }
 int main(int argc, const char** argv){
-  int state, state2, state3;
+    int state, state2, state3;
+    float ***input, ***kernel, ***output; 
     if(argc == 4){
         FILE *input_file = fopen(argv[1],"rt");
         FILE *kernel_file = fopen(argv[2],"rt");
@@ -24,17 +25,94 @@ int main(int argc, const char** argv){
             printf("스트림 생성시 오류발생");
             return 1;
        }
-       char a;
-       while(1){
-            if (feof(kernel_file) != 0){
-                printf("복사가 완료되었습니다.\n");
-                break;
-            }
-
-
-            a = fgetc(kernel_file);
-            printf("%c ",a);
+       char buffer[20],row_temp[20],col_temp[20],height_temp[20];
+       int row,col,height;
+       fscanf(input_file,"%s",height_temp);
+       fscanf(input_file,"%s",col_temp);
+       fscanf(input_file,"%s",row_temp);
+       height = atoi(height_temp);
+       row = atoi(row_temp);
+       col = atoi(col_temp);
+       
+       input = (float***)malloc(sizeof(float**) * height);
+       for(int i=0; i<height; i++){
+           input[i] = (float**)malloc(sizeof(float*) * col);
+           for(int j=0; j<col; j++){
+                input[i][j] = (float*)malloc(sizeof(float) * row);
+           }
        }
+
+       float num;
+       for(int i=0;i<height;i++){
+           for(int j=0;j<col;j++){
+               for(int k=0;k<row;k++){
+                    if (feof(input_file) != 0){
+                        break;
+                    }
+                    fscanf(input_file,"%s",buffer);
+                    num = atof(buffer);
+                    input[i][j][k] = num;
+               }
+           }
+       }
+       //input
+
+       //kernel
+       fscanf(kernel_file,"%s",height_temp);
+       height = atoi(height_temp);
+       kernel = (float***)malloc(sizeof(float**) * height);
+       for(int i=0; i<height; i++){
+            kernel[i] = (float**)malloc(sizeof(float*) * height);
+           for(int j=0; j<height; j++){
+                kernel[i][j] = (float*)malloc(sizeof(float) * height);
+           }
+       }
+        for(int i=0;i<height;i++){
+            for(int j=0;j<height;j++){
+                for(int k=0;k<height;k++){
+                    if (feof(kernel_file) != 0){
+                        break;
+                    }
+                    fscanf(kernel_file,"%s",buffer);
+                    num = atof(buffer);
+                    kernel[i][j][k] = num;
+                }
+            }
+        }
+        //kernel
+
+        //output
+        fscanf(output_file,"%s",height_temp);
+        fscanf(output_file,"%s",col_temp);
+        fscanf(output_file,"%s",row_temp);
+        height = atoi(height_temp);
+        row = atoi(row_temp);
+        col = atoi(col_temp);
+
+        output = (float***)malloc(sizeof(float**) * height);
+       for(int i=0; i<height; i++){
+        output[i] = (float**)malloc(sizeof(float*) * col);
+           for(int j=0; j<col; j++){
+                output[i][j] = (float*)malloc(sizeof(float) * row);
+           }
+       }
+
+       for(int i=0;i<height;i++){
+           for(int j=0;j<col;j++){
+               for(int k=0;k<row;k++){
+                    if (feof(output_file) != 0){
+                        break;
+                    }
+                    fscanf(output_file,"%s",buffer);
+                    num = atof(buffer);
+                    output[i][j][k] = num;
+               }
+           }
+       }
+       printf("%f \n",output[0][0][0]);
+       printf("%f \n",output[0][0][1]);
+       printf("%f \n",output[0][0][2]);
+       
        state = fclose(input_file);
        state2 = fclose(kernel_file);
        state3 = fclose(output_file);
