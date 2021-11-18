@@ -5,6 +5,7 @@
 #define KERNEL_SIZE 5
 #define BLOCK_SIZE (TILE_SIZE)-1
 void verification(float* GPU, float* output, int height, int col, int row){
+    int check=0;
     for(int i=0;i<height;i++){
         for(int j=0;j<col;j++){
             for(int k=0;k<row;k++){
@@ -14,11 +15,16 @@ void verification(float* GPU, float* output, int height, int col, int row){
                 }
                 else{
                     printf("NON EQUAL\n");
+                    check=1;
                 }
             }
         }
     }
-
+    if(check){
+        printf("Results are not eqaul!\n");
+    }else{
+        printf("Results are equal\n");
+    }
 }
 
 __constant__ float Kernel_const[KERNEL_SIZE*KERNEL_SIZE*KERNEL_SIZE];

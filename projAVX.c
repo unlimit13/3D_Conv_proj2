@@ -1,6 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <immintrin.h>
+#include <x86intrin.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
 
 void single_3DConv(float ***input,float ***kernel,float ***output,int row, int col, int height, int kernel_height){
     int height_length = height+((kernel_height-1))-(kernel_height-1); //여기도 지금 kernel 3기준임
@@ -190,16 +195,21 @@ int main(int argc, char **argv)
         printf("스트림 제거시 오류발생");
         return 1;
     }
+    uint64_t start, end;
     int check = 0;
+    start = __rdtsc();
     single_3DConv(input,kernel,avx_output,row,col,height,kernel_height);
+    end = __rdtsc();
+    printf("\nExecution time for kernel: %ld ms\n",end-start);
     for(int i=0;i<height;i++){
            for(int j=0;j<col;j++){
                for(int k=0;k<row;k++){
+                   printf("Single : %f vs output : %f \n",avx_output[i][j][k],output[i][j][k]);
                    if(abs(output[i][j][k] - avx_output[i][j][k]) < 0.001f){
-                       //printf("equal!\n");
+                       printf("---\n");
                    }
                    else{
-                       printf("not equal!\n");
+                       printf("NON EQUAL\n");
                        check = 1;
                    }
                }
