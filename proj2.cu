@@ -1,11 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <immintrin.h>
 #define KERNEL_SIZE 3
 
 __constant__ float Mc[KERNEL_SIZE][KERNEL_SIZE];
 
-void single_3DConv(){
-
+void single_3DConv(float ***input,float ***kernel,float ***output,int row, int col, int height, int kernel_height){
+    for(int i=0;i<height;i++){
+        for(int j=0;j<col;j++){
+            for(int k=0;k<row;k++){
+                 printf("%f ",input[i][j][k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
 }
 void multi_3DConv(){
 
@@ -17,6 +26,7 @@ __global__ void _3DConv(){
 int main(int argc, const char** argv){
     int state, state2, state3;
     float ***input, ***kernel, ***output; 
+    int row,col,height,kernel_height;
     if(argc == 4){
         FILE *input_file = fopen(argv[1],"rt");
         FILE *kernel_file = fopen(argv[2],"rt");
@@ -26,7 +36,6 @@ int main(int argc, const char** argv){
             return 1;
        }
        char buffer[20],row_temp[20],col_temp[20],height_temp[20];
-       int row,col,height;
        fscanf(input_file,"%s",height_temp);
        fscanf(input_file,"%s",col_temp);
        fscanf(input_file,"%s",row_temp);
@@ -58,18 +67,19 @@ int main(int argc, const char** argv){
        //input
 
        //kernel
-       fscanf(kernel_file,"%s",height_temp);
-       height = atoi(height_temp);
-       kernel = (float***)malloc(sizeof(float**) * height);
-       for(int i=0; i<height; i++){
-            kernel[i] = (float**)malloc(sizeof(float*) * height);
-           for(int j=0; j<height; j++){
-                kernel[i][j] = (float*)malloc(sizeof(float) * height);
+       char kernel_temp[20];
+       fscanf(kernel_file,"%s",kernel_temp);
+       kernel_height = atoi(kernel_temp);
+       kernel = (float***)malloc(sizeof(float**) * kernel_height);
+       for(int i=0; i<kernel_height; i++){
+            kernel[i] = (float**)malloc(sizeof(float*) * kernel_height);
+           for(int j=0; j<kernel_height; j++){
+                kernel[i][j] = (float*)malloc(sizeof(float) * kernel_height);
            }
        }
-        for(int i=0;i<height;i++){
-            for(int j=0;j<height;j++){
-                for(int k=0;k<height;k++){
+        for(int i=0;i<kernel_height;i++){
+            for(int j=0;j<kernel_height;j++){
+                for(int k=0;k<kernel_height;k++){
                     if (feof(kernel_file) != 0){
                         break;
                     }
@@ -109,9 +119,7 @@ int main(int argc, const char** argv){
                }
            }
        }
-       printf("%f \n",output[0][0][0]);
-       printf("%f \n",output[0][0][1]);
-       printf("%f \n",output[0][0][2]);
+       
        
        state = fclose(input_file);
        state2 = fclose(kernel_file);
@@ -135,7 +143,7 @@ int main(int argc, const char** argv){
 	cudaEventCreate(&end);
 
 	cudaEventRecord(start,0);
-	single_3DConv();
+	single_3DConv(input,kernel,output,row,col,height,kernel_height);
 	cudaEventRecord(end,0);
 	cudaEventSynchronize(end);
 	cudaEventElapsedTime(&time_ms_single,start,end);
