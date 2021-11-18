@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <time.h>
 #include <pthread.h>
 
 typedef struct params
@@ -232,13 +233,13 @@ int main(int argc, char **argv)
         printf("스트림 제거시 오류발생");
         return 1;
     }
-    uint64_t start, end;
-    int check = 0;
-    start = __rdtsc();
 
+    int check = 0;
+    clock_t start, end;
+    start = clock();
     Multi_3DConv(input,kernel,avx_output,row,col,height,kernel_height);
-        end = __rdtsc();
-    printf("\nExecution time for kernel: %ld ms\n",end-start);
+    end = clock();
+    printf("\nExecution time for kernel: %f s\n",(float)(end-start)/CLOCKS_PER_SEC);
     for(int i=0;i<height;i++){
            for(int j=0;j<col;j++){
                for(int k=0;k<row;k++){
