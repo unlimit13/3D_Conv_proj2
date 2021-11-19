@@ -70,8 +70,6 @@ void Multi_3DConv(float ***input,float ***kernel,float ***output,int row, int co
             for(int k=0;k<row;k++){
                 
                 //printf("here1!\n");
-                
-                    
                     //printf("here2!\n");
                     thread_params[k]->input = input;
                     thread_params[k]->kernel = kernel;
