@@ -9,16 +9,20 @@
 #include <unistd.h>
 
 void single_3DConv(float ***input,float ***kernel,float ***output,int row, int col, int height, int kernel_height){
+    float **input_temp, **kernel_temp;
+    for(int m=0;m<kernel_height;m++){
+        input_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
+        kernel_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
+        for(int l = 0; l<kernel_height;l++){
+            input_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
+            kernel_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
+        }
+    }
+                     
     for(int i=0;i<height;i++){
         for(int j=0;j<col;j++){
             for(int k=0;k<row;k++){
                  for(int m=0;m<kernel_height;m++){
-                     float **input_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
-                     float **kernel_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
-                     for(int l = 0; l<kernel_height;l++){
-                         input_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
-                         kernel_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
-                     }
                      
                      for(int o=0;o<kernel_height;o++){
                          for(int p=0;p<kernel_height;p++){

@@ -1,9 +1,9 @@
 GPU : proj2.cu
 	nvcc proj2.cu -o GPU -g
 Single : projAVX.c
-	gcc -mavx2 -o Single projAVX.c 
+	gcc -pg -mavx2 -o Single projAVX.c 
 Multi : projAVX_M.c
-	gcc -mavx2 -o Multi projAVX_M.c -lpthread -Wall
+	gcc -pg -mavx2 -o Multi projAVX_M.c -lpthread -Wall
 
 GPUtest:
 	\rm -f output/GPU/test1 output/GPU/test2 output/GPU/test3 output/GPU/test4 output/GPU/test5

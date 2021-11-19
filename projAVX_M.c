@@ -19,16 +19,19 @@ typedef struct params
 }Params;
 
 void *woker(void *arg){
+    float **input_temp;
+    float **kernel_temp;
     Params *data = (Params *)arg;
     int kernel_height = data->kernel_size;
     for(int m=0;m<kernel_height;m++){
-        float **input_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
-        float **kernel_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
+        input_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
+        kernel_temp = aligned_alloc(32,sizeof(float*) * kernel_height);
         for(int l = 0; l<kernel_height;l++){
             input_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
             kernel_temp[l] = aligned_alloc(32,sizeof(float) * kernel_height);
-        }
-                        
+        }  
+    }
+    for(int m=0;m<kernel_height;m++){
         for(int o=0;o<kernel_height;o++){
             for(int p=0;p<kernel_height;p++){
                 input_temp[o][p] = data->input[data->i+m][data->j+o][data->k+p];
@@ -60,27 +63,23 @@ void *woker(void *arg){
 void Multi_3DConv(float ***input,float ***kernel,float ***output,int row, int col, int height, int kernel_height){
     pthread_t *threads;
     threads = (pthread_t *)malloc(sizeof(pthread_t)*row);
-    Params** thread_params;
-    thread_params = (Params**)malloc(sizeof(Params*) *row);
-    for(int i=0;i<row;i++){
-        thread_params[i] = (Params*)malloc(sizeof(Params));
-    }
     for(int i=0;i<height;i++){
         for(int j=0;j<col;j++){
             for(int k=0;k<row;k++){
                 
                 //printf("here1!\n");
                     //printf("here2!\n");
-                    thread_params[k]->input = input;
-                    thread_params[k]->kernel = kernel;
-                    thread_params[k]->output = output;
-                    thread_params[k]->i = i;
-                    thread_params[k]->j = j;
-                    thread_params[k]->k = k;
-                    thread_params[k]->kernel_size = kernel_height;
+                    Params *thread_params = (Params*)malloc(sizeof(Params));
+                    thread_params->input = input;
+                    thread_params->kernel = kernel;
+                    thread_params->output = output;
+                    thread_params->i = i;
+                    thread_params->j = j;
+                    thread_params->k = k;
+                    thread_params->kernel_size = kernel_height;
                     //printf("here3!\n");
                     //printf("m : %d\n",m);
-                    pthread_create(&threads[k],NULL,woker,(void*)thread_params[k]);
+                    pthread_create(&threads[k],NULL,woker,(void*)thread_params);
                     pthread_detach(threads[k]);
                     //printf("here4\n");
                 
@@ -236,11 +235,11 @@ int main(int argc, char **argv)
     }
 
     int check = 0;
-    clock_t start, end;
-    start = clock();
+    struct timespec start,end;
+    clock_gettime(CLOCK_MONOTONIC,&start);
     Multi_3DConv(input,kernel,avx_output,row,col,height,kernel_height);
-    end = clock();
-    printf("\nExecution time for kernel: %f s\n",(float)(end-start)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC,&end);
+    printf("\nExecution time for kernel: %f s\n",(float)((end.tv_sec-start.tv_sec)+ ((end.tv_nsec - start.tv_nsec)/ 1000000000.0)));
     for(int i=0;i<height;i++){
            for(int j=0;j<col;j++){
                for(int k=0;k<row;k++){
