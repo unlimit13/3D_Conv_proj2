@@ -79,8 +79,11 @@ void Multi_3DConv(float ***input,float ***kernel,float ***output,int row, int co
         thread_params->row = row;
         thread_params->kernel_size = kernel_height;
         pthread_create(&threads[i],NULL,woker,(void*)thread_params);
-        pthread_detach(threads[i]);
+        //pthread_detach(threads[i]);
 
+    }
+    for(int i=0;i<height;i++){
+        pthread_join(threads[i],NULL);
     }
    
 }
