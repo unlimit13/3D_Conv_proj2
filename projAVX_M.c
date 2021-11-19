@@ -20,7 +20,6 @@ typedef struct params
 }Params;
 
 void *woker(void *arg){
-
     Params *data = (Params *)arg;
     int kernel_height = data->kernel_size;
     float ** input_temp;
@@ -81,6 +80,7 @@ void Multi_3DConv(float ***input,float ***kernel,float ***output,int row, int co
         thread_params->kernel_size = kernel_height;
         pthread_create(&threads[i],NULL,woker,(void*)thread_params);
         pthread_detach(threads[i]);
+
     }
    
 }
