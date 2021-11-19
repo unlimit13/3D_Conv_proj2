@@ -58,29 +58,31 @@ void *woker(void *arg){
 }
 
 void Multi_3DConv(float ***input,float ***kernel,float ***output,int row, int col, int height, int kernel_height){
-    int height_length = height+((kernel_height-1))-(kernel_height-1); //여기도 지금 kernel 3기준임
-    int col_length = col+((kernel_height-1))-(kernel_height-1);
-    int row_length = row+((kernel_height-1))-(kernel_height-1);
-    for(int i=0;i<height_length;i++){
-        for(int j=0;j<col_length;j++){
-            for(int k=0;k<row_length;k++){
-                pthread_t *threads;
-                threads = (pthread_t *)malloc(sizeof(pthread_t)*row_length);
+    pthread_t *threads;
+    threads = (pthread_t *)malloc(sizeof(pthread_t)*row);
+    Params** thread_params;
+    thread_params = (Params**)malloc(sizeof(Params*) *row);
+    for(int i=0;i<row;i++){
+        thread_params[i] = (Params*)malloc(sizeof(Params));
+    }
+    for(int i=0;i<height;i++){
+        for(int j=0;j<col;j++){
+            for(int k=0;k<row;k++){
+                
                 //printf("here1!\n");
                 
-                    Params* thread_params;
-                    thread_params = (Params*)malloc(sizeof(Params));
+                    
                     //printf("here2!\n");
-                    thread_params->input = input;
-                    thread_params->kernel = kernel;
-                    thread_params->output = output;
-                    thread_params->i = i;
-                    thread_params->j = j;
-                    thread_params->k = k;
-                    thread_params->kernel_size = kernel_height;
+                    thread_params[k]->input = input;
+                    thread_params[k]->kernel = kernel;
+                    thread_params[k]->output = output;
+                    thread_params[k]->i = i;
+                    thread_params[k]->j = j;
+                    thread_params[k]->k = k;
+                    thread_params[k]->kernel_size = kernel_height;
                     //printf("here3!\n");
                     //printf("m : %d\n",m);
-                    pthread_create(&threads[k],NULL,woker,(void*)thread_params);
+                    pthread_create(&threads[k],NULL,woker,(void*)thread_params[k]);
                     pthread_detach(threads[k]);
                     //printf("here4\n");
                 
